@@ -11,6 +11,11 @@ package net.pushl {
   package string {
     // RollingHash (RollingHash.scala)
   }
+  package geometry {
+    // Point
+    // Segment
+    // Line
+  }
   object EnRich {
     implicit class AString(val self : String) extends AnyVal {
       def splitToIntArray = self.split(" ").map(_.toInt)
