@@ -14,6 +14,7 @@ cp -r $TEMPLATEDIR/* $PWD
 rm -r $PWD/project
 rm -r $PWD/target
 rm -r $PWD/copy.sh
+rm -r $PWD/README.md
 find  $PWD/src/test/scala -type f | grep -v -E "MainTest.scala" | xargs rm
 
 exit 0
