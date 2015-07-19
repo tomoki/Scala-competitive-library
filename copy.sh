@@ -1,7 +1,15 @@
 #!/bin/sh
 
+
+if [ $# -ne 1 ]; then
+    echo "usage: copy.sh distdir"
+    exit 1
+fi
+PWD=$1
+if [ ! -d $PWD ]; then
+    mkdir $PWD
+fi
 TEMPLATEDIR=`dirname $0`
-PWD=`pwd`
 
 P1=`realpath $TEMPLATEDIR`
 P2=`realpath $PWD`
