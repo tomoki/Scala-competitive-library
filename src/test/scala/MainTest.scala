@@ -30,7 +30,7 @@ class MainSpec extends FlatSpec with Timeouts {
     fail("tests directory not found")
   }
   val input_files = lsFile(test_files_dir_str).filter((k) => getExtension(k.getName) == "in")
-  val timeout = 2000
+  val timeout = 2000l
   for(i <- input_files){
     val o = eraseExtension(i.getPath) + ".out"
     val exist_expected_file = Files.exists(Paths.get(o))
@@ -43,7 +43,6 @@ class MainSpec extends FlatSpec with Timeouts {
       failAfter(Span(timeout, Millis)) {
         dummy_out = execWithDummyStdio(Main.main,dummy_in)
       }
-      // val dummy_out = execWithDummyStdio(Main.main,dummy_in)
       val end       = System.currentTimeMillis();
       val expected  = new String(Files.readAllBytes(Paths.get(o)))
       val interval  = end - start;
