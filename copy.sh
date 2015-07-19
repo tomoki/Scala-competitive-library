@@ -15,6 +15,6 @@ rm -r $PWD/project
 rm -r $PWD/target
 rm -r $PWD/copy.sh
 rm -r $PWD/README.md
-find  $PWD/src/test/scala -type f | grep -v -E "MainTest.scala" | xargs rm
+find  $PWD/src/test/scala -type f | grep -v -w "MainTest.scala" | grep -v -w "Test.scala" | xargs rm
 
 exit 0
