@@ -12,16 +12,17 @@ object Main {
 package net.pushl.io {
   import java.io.{BufferedReader, PrintWriter, PrintStream, PushbackReader}
   class MyConsole(val in: BufferedReader, val _out: PrintStream,
-                  val _err: PrintStream) {
+                  val err: PrintStream) {
     // PrintWriter do not flush automatically
     val out = new PrintWriter(_out,false)
     // If argument is null, there are ambiguous which function will be called
     def print(obj: Any)                  = out.print(if(obj == null) "null" else obj.toString)
-    def println()                        = out.println
+    def println()                        = out.println()
     def println(obj: Any)                = out.println(obj)
     def printf(text: String, args: Any*) = out.printf(text.format(args : _*))
     // NOTE: YOU MUST FLUSH BEFORE END OF MAIN
-    def flush()                          = out.flush
+    def flush()                          = out.flush()
+    def debugln(obj: Any)                = err.println(obj)
 
     def nextInt()        : Int        = nextLong().toInt
     def nextBigInt()     : BigInt     = BigInt(nextString())
@@ -157,6 +158,7 @@ package net.pushl {
   }
 }
 
+// Document: http://www.scala-lang.org/api/current/#package
 // -----------------------------------------------------------------------------
 class Solver(val stdio: MyConsole){
   import stdio._ // shadow Console.~
