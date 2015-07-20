@@ -30,43 +30,38 @@ package net.pushl.io {
     def nextLong() : Long = {
       if(!goNextValuable())
         throw new NoSuchElementException("Reading long failed")
-      else{
-        val sgn = if(peek == '-') -1l else 1
-        if(sgn == -1l) read()
-        if(peek < '0' || '9' < peek){
-          throw new NumberFormatException(s"readLong found only '-' or no number")
-        }
-        @tailrec
-        def readLong(next: Int, cur: Long) : Long =
-          if('0' <= next && next <= '9')
-            readLong(readWithoutCheckingPeeked(), cur*10 + next-'0')
-          else if(endInt(next) || isSpaceOrControl(next))
-            sgn*cur
-          else
-            throw new NumberFormatException(s"readLong found strange byte $next")
-        val res = readLong(read(),0)
-        skipTrailingSpaces()
-        res
-      }
+      val sgn = if(peek == '-') -1l else 1
+      if(sgn == -1l) read()
+      if(peek < '0' || '9' < peek)
+        throw new NumberFormatException(s"readLong found only '-' or no number")
+      @tailrec
+      def readLong(next: Int, cur: Long) : Long =
+        if('0' <= next && next <= '9')
+          readLong(readWithoutCheckingPeeked(), cur*10 + next-'0')
+        else if(endInt(next) || isSpaceOrControl(next))
+          sgn*cur
+        else
+          throw new NumberFormatException(s"readLong found strange byte $next")
+      val res = readLong(read(),0)
+      skipTrailingSpaces()
+      res
     }
     def nextString() : String = {
       if(!goNextValuable())
         throw new NoSuchElementException("Reading String failed")
-      else {
-        val builder = new StringBuilder
-        @tailrec
-        def appendCode(next: Int) : String = {
-          if(endInt(next) || isSpaceOrControl(next)){
-            builder.toString
-          }else{
-            builder.append(next.toChar)
-            appendCode(readWithoutCheckingPeeked())
-          }
+      val builder = new StringBuilder
+      @tailrec
+      def appendCode(next: Int) : String = {
+        if(endInt(next) || isSpaceOrControl(next)){
+          builder.toString
+        }else{
+          builder.append(next.toChar)
+          appendCode(readWithoutCheckingPeeked())
         }
-        val res = appendCode(read())
-        skipTrailingSpaces()
-        res
       }
+      val res = appendCode(read())
+      skipTrailingSpaces()
+      res
     }
     // TODO: refactoring to marge nextString
     def readLine() : String = {
@@ -110,36 +105,31 @@ package net.pushl.io {
         }
         case Some(a) => a
       }
-    @inline private def endInt(c: Int) = c == -1
-    // LF and CR
-    @inline private def isNewLine(c: Int) = c == 10 || c == 13 
+    @inline private def endInt(c: Int)    = c == -1
+    @inline private def isNewLine(c: Int) = c == 10 || c == 13     // LF and CR
     @inline private def isThereReadable() = !endInt(peek)
     // XXX: this limits c is ASCII?
     @inline private def isSpaceOrControl(c: Int) = (0 <= c && c <= 32) || c == 127
     @tailrec
-    final private def goNextNotSpaceNorControl() : Unit = {
+    final private def goNextNotSpaceNorControl() : Unit =
       if(isSpaceOrControl(peek)){
         read()
         goNextNotSpaceNorControl()
-      }else {}
-    }
+      }
     @tailrec
-    final private def skipTrailingSpaces() : Unit = {
+    final private def skipTrailingSpaces() : Unit =
       if(!isNewLine(last) && !isNewLine(peek) && isSpaceOrControl(peek)){
         read()
         skipTrailingSpaces()
       }
-    }
     @tailrec
-    final private def skipTrailingSpacesAndNewline() : Unit = {
+    final private def skipTrailingSpacesAndNewline() : Unit =
       if(isNewLine(peek)){
         val _ = read() // windows causes error. maybe.
       }else if(isSpaceOrControl(peek)){
         read()
         skipTrailingSpacesAndNewline()
-      }else{
       }
-    }
     @inline private def goNextValuable() = {
       goNextNotSpaceNorControl()
       isThereReadable()
