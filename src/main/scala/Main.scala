@@ -1,8 +1,152 @@
-import scala.io.StdIn.readLine
-import scala.collection.mutable.PriorityQueue
 import scala.annotation.tailrec
+import net.pushl.io.MyConsole
 
-// PriorityQueue[Long]()(scala.math.Ordering.Long.reverse)
+object Main {
+  def main(args: Array[String]) : Unit = {
+    val console = new MyConsole(Console.in, Console.out, Console.err)
+    val solver  = new Solver(console)
+    solver.main()
+    console.flush()
+  }
+}
+package net.pushl.io {
+  import java.io.{BufferedReader, PrintWriter, PrintStream, PushbackReader}
+  class MyConsole(val in: BufferedReader, val _out: PrintStream,
+                  val _err: PrintStream) {
+    // PrintWriter do not flush automatically
+    val out = new PrintWriter(_out,false)
+    // If argument is null, there are ambiguous which function will be called
+    def print(obj: Any)                  = out.print(if(obj == null) "null" else obj.toString)
+    def println()                        = out.println
+    def println(obj: Any)                = out.println(obj)
+    def printf(text: String, args: Any*) = out.printf(text.format(args : _*))
+    // NOTE: YOU MUST FLUSH BEFORE END OF MAIN
+    def flush()                          = out.flush
+
+    def nextInt()        : Int        = nextLong().toInt
+    def nextBigInt()     : BigInt     = BigInt(nextString())
+    def nextBigDecimal() : BigDecimal = BigDecimal(nextString())
+    def nextDouble()     : Double     = nextString().toDouble
+    def nextLong() : Long = {
+      if(!goNextValuable())
+        throw new NoSuchElementException("Reading long failed")
+      else{
+        val sgn = if(peek == '-') -1l else 1
+        if(sgn == -1l) read()
+        if(peek < '0' || '9' < peek){
+          throw new NumberFormatException(s"readLong found only '-' or no number")
+        }
+        @tailrec
+        def readLong(next: Int, cur: Long) : Long =
+          if('0' <= next && next <= '9')
+            readLong(readWithoutCheckingPeeked(), cur*10 + next-'0')
+          else if(endInt(next) || isSpaceOrControl(next))
+            sgn*cur
+          else
+            throw new NumberFormatException(s"readLong found strange byte $next")
+        val res = readLong(read(),0)
+        skipTrailingSpaces()
+        res
+      }
+    }
+    def nextString() : String = {
+      if(!goNextValuable())
+        throw new NoSuchElementException("Reading String failed")
+      else {
+        val builder = new StringBuilder
+        @tailrec
+        def appendCode(next: Int) : String = {
+          if(endInt(next) || isSpaceOrControl(next)){
+            builder.toString
+          }else{
+            builder.append(next.toChar)
+            appendCode(readWithoutCheckingPeeked())
+          }
+        }
+        val res = appendCode(read())
+        skipTrailingSpaces()
+        res
+      }
+    }
+    // TODO: refactoring to marge nextString
+    def readLine() : String = {
+      if(isNewLine(peek)) read()
+      if(endInt(peek))
+        throw new NoSuchElementException("Reading Line failed")
+      val builder = new StringBuilder
+      @tailrec
+      def appendCode(next: Int) : String = {
+        if(endInt(next) || isNewLine(next)){
+          builder.toString
+        }else{
+          builder.append(next.toChar)
+          appendCode(read())
+        }
+      }
+      appendCode(read())
+    }
+    // helpers
+    private[this] var peeked: Option[Int] = None
+    private[this] var last = -1
+    private def read() = {
+      val res = peeked match {
+          case None    => in.read()
+          case Some(a) => { peeked = None; a }
+        }
+      last = res
+      res
+    }
+    @inline private def readWithoutCheckingPeeked() = {
+      val res = in.read()
+      last = res
+      res
+    }
+    @inline private def peek() =
+      peeked match {
+        case None    => {
+          val res = in.read()
+          peeked  = Some(res)
+          res
+        }
+        case Some(a) => a
+      }
+    @inline private def endInt(c: Int) = c == -1
+    // LF and CR
+    @inline private def isNewLine(c: Int) = c == 10 || c == 13 
+    @inline private def isThereReadable() = !endInt(peek)
+    // XXX: this limits c is ASCII?
+    @inline private def isSpaceOrControl(c: Int) = (0 <= c && c <= 32) || c == 127
+    @tailrec
+    final private def goNextNotSpaceNorControl() : Unit = {
+      if(isSpaceOrControl(peek)){
+        read()
+        goNextNotSpaceNorControl()
+      }else {}
+    }
+    @tailrec
+    final private def skipTrailingSpaces() : Unit = {
+      if(!isNewLine(last) && !isNewLine(peek) && isSpaceOrControl(peek)){
+        read()
+        skipTrailingSpaces()
+      }
+    }
+    @tailrec
+    final private def skipTrailingSpacesAndNewline() : Unit = {
+      if(isNewLine(peek)){
+        val _ = read() // windows causes error. maybe.
+      }else if(isSpaceOrControl(peek)){
+        read()
+        skipTrailingSpacesAndNewline()
+      }else{
+      }
+    }
+    @inline private def goNextValuable() = {
+      goNextNotSpaceNorControl()
+      isThereReadable()
+    }
+  }
+}
+
 package net.pushl {
   package number {
     // Prime  (Prime.scala)
@@ -20,99 +164,10 @@ package net.pushl {
     // UnionFindTree (UnionFind.scala)
   }
   package io {
-    import java.io.{BufferedReader, PrintWriter, PrintStream, PushbackReader}
-    class MyConsole(val in: BufferedReader, val _out: PrintStream,
-                    val _err: PrintStream) {
-      // PrintWriter do not flush automatically
-      val out = new PrintWriter(_out,false)
-      // If argument is null, there are ambiguous which function will be called
-      def print(obj: Any)                  = out.print(if(obj == null) "null" else obj.toString)
-      def println()                        = out.println
-      def println(obj: Any)                = out.println(obj)
-      def printf(text: String, args: Any*) = out.printf(text.format(args : _*))
-      // NOTE: YOU MUST FLUSH BEFORE END OF MAIN
-      def flush()                          = out.flush
-
-      def nextInt()  : Int  = nextLong().toInt
-      def nextLong() : Long = {
-        if(!goNextValuable())
-          throw new NoSuchElementException("Reading long failed")
-        else{
-          val sgn = if(peek() == '-') -1l else 1
-          @tailrec
-          def readLong(next: Int, cur: Long) : Long =
-            if('0' <= next && next <= '9')
-              readLong(readWithoutCheckingPeeked(), cur*10 + next-'0')
-            else if(isSpaceOrControl(next))
-              sgn*cur
-            else
-              throw new NumberFormatException(s"readLong found strange byte $next")
-          readLong(read(),0)
-        }
-      }
-      def nextString() : String = {
-        if(!goNextValuable())
-          throw new NoSuchElementException("Reading String failed")
-        else {
-          val builder = new StringBuilder
-          @tailrec
-          def appendCode(next: Int) : String = {
-            if(isSpaceOrControl(next)){
-              builder.toString
-            }else{
-              builder.append(next.toChar)
-              appendCode(read())
-            }
-          }
-          appendCode(read())
-        }
-      }
-      // helpers
-      private[this] var peeked: Option[Int] = None
-      @inline private def read() =
-        peeked match {
-          case None    => in.read()
-          case Some(a) => { peeked = None; a }
-        }
-      @inline private def readWithoutCheckingPeeked() = in.read()
-      @inline private def peek() =
-        peeked match {
-          case None    => {
-            val res = in.read()
-            peeked  = Some(res)
-            res
-          }
-          case Some(a) => a
-        }
-      @inline private def isThereReadable() = peek() != -1
-      // XXX: this limits c is ASCII?
-      @inline private def isSpaceOrControl(c: Int) = c <= 32 || c == 127
-      @tailrec
-      final private def goNextNotSpaceNorControl() : Unit = {
-        if(isSpaceOrControl(peek())) {
-          read()
-          goNextNotSpaceNorControl()
-        }else {}
-      }
-      @inline private def goNextValuable() = {
-        goNextNotSpaceNorControl()
-        isThereReadable()
-      }
-    }
   }
 }
 
-import net.pushl.io.MyConsole
-object Main {
-  def main(args: Array[String]) : Unit = {
-    val console = new MyConsole(Console.in, Console.out, Console.err)
-    val solver  = new Solver(console)
-    solver.main()
-    console.flush()
-  }
-}
-
-
+// -----------------------------------------------------------------------------
 class Solver(val stdio: MyConsole){
   import stdio._ // shadow Console.~
   def main() : Unit = {
