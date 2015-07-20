@@ -1,6 +1,47 @@
 import scala.annotation.tailrec
 import net.pushl.io.MyConsole
 
+package net.pushl {
+  package number {
+    // Prime    (Prime.scala)
+    // Number   (Number.scala)
+    // Combi    (Combi.scala)
+    // Optimize (Optimize.scala)
+  }
+  package string {
+    // RollingHash (RollingHash.scala)
+  }
+  package geometry {
+    // Point   (Geometry.scala)
+    // Segment (Geometry.scala)
+    // Line    (Geometry.scala)
+  }
+  package datastructure {
+    // UnionFindTree (UnionFind.scala)
+  }
+  package io {
+  }
+}
+
+// Document: http://www.scala-lang.org/api/current/#package
+// -----------------------------------------------------------------------------
+class Solver(val stdio: MyConsole){
+  import stdio._ // shadow Console.~
+  def main() : Unit = {
+    // write here.
+  }
+}
+
+
+
+
+
+
+
+
+
+// ----------------------------------------------------------------------------0
+// ----------------------------------------------------------------------------0
 object Main {
   def main(args: Array[String]) : Unit = {
     val console = new MyConsole(Console.in, Console.out, Console.err)
@@ -42,7 +83,7 @@ package net.pushl.io {
       def readLong(next: Int, cur: Long) : Long =
         if('0' <= next && next <= '9')
           readLong(readWithoutCheckingPeeked(), cur*10 + next-'0')
-        else if(endInt(next) || isSpaceOrControl(next))
+        else if(isEnd(next) || isSpaceOrControl(next))
           sgn*cur
         else
           throw new NumberFormatException(s"readLong found strange byte $next")
@@ -56,7 +97,7 @@ package net.pushl.io {
       val builder = new StringBuilder
       @tailrec
       def appendCode(next: Int) : String = {
-        if(endInt(next) || isSpaceOrControl(next)){
+        if(isEnd(next) || isSpaceOrControl(next)){
           builder.toString
         }else{
           builder.append(next.toChar)
@@ -69,12 +110,12 @@ package net.pushl.io {
     }
     // TODO: refactoring to marge nextString
     def readLine() : String = {
-      if(endInt(peek))
+      if(isEnd(peek))
         throw new NoSuchElementException("Reading Line failed")
       val builder = new StringBuilder
       @tailrec
       def appendCode(next: Int) : String = {
-        if(endInt(next) || isNewLine(next)){
+        if(isEnd(next) || isNewLine(next)){
           builder.toString
         }else{
           builder.append(next.toChar)
@@ -108,9 +149,9 @@ package net.pushl.io {
         }
         case Some(a) => a
       }
-    @inline private def endInt(c: Int)    = c == -1
+    @inline private def isEnd(c: Int)    = c == -1
     @inline private def isNewLine(c: Int) = c == 10 || c == 13     // LF and CR
-    @inline private def isThereReadable() = !endInt(peek)
+    @inline private def isThereReadable() = !isEnd(peek)
     // XXX: this limits c is ASCII?
     @inline private def isSpaceOrControl(c: Int) = (0 <= c && c <= 32) || c == 127
     @tailrec
@@ -147,7 +188,7 @@ package net.pushl.io {
       val vb = new VectorBuilder[X]()
       @tailrec
       def parseLineToVectorAux(first: Boolean=false) : Vector[X] =
-        if((!first && isNewLine(last)) || isNewLine(peek) || endInt(peek)) {
+        if((!first && isNewLine(last)) || isNewLine(peek) || isEnd(peek)) {
           vb.result
         }else{
           vb += parser()
@@ -155,35 +196,6 @@ package net.pushl.io {
         }
       parseLineToVectorAux(true)
     }
-  }
-}
-
-package net.pushl {
-  package number {
-    // Prime  (Prime.scala)
-    // Number (Number.scala)
-  }
-  package string {
-    // RollingHash (RollingHash.scala)
-  }
-  package geometry {
-    // Point   (Geometry.scala)
-    // Segment (Geometry.scala)
-    // Line    (Geometry.scala)
-  }
-  package datastructure {
-    // UnionFindTree (UnionFind.scala)
-  }
-  package io {
-  }
-}
-
-// Document: http://www.scala-lang.org/api/current/#package
-// -----------------------------------------------------------------------------
-class Solver(val stdio: MyConsole){
-  import stdio._ // shadow Console.~
-  def main() : Unit = {
-    // write here.
   }
 }
 
