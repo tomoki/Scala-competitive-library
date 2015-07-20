@@ -24,10 +24,13 @@ package net.pushl.io {
     def flush()                          = out.flush()
     def debugln(obj: Any)                = err.println(obj)
 
-    def nextInt()        : Int        = nextLong().toInt
-    def nextBigInt()     : BigInt     = BigInt(nextString())
-    def nextBigDecimal() : BigDecimal = BigDecimal(nextString())
-    def nextDouble()     : Double     = nextString().toDouble
+    def readIntVector()    : Vector[Int]    = parseLineToVector(() => nextInt)
+    def readLongVector()   : Vector[Long]   = parseLineToVector(() => nextLong)
+    def readStringVector() : Vector[String] = parseLineToVector(() => nextString)
+    def nextInt()          : Int            = nextLong().toInt
+    def nextBigInt()       : BigInt         = BigInt(nextString())
+    def nextBigDecimal(  ) : BigDecimal     = BigDecimal(nextString())
+    def nextDouble()       : Double         = nextString().toDouble
     def nextLong() : Long = {
       if(!goNextValuable())
         throw new NoSuchElementException("Reading long failed")
@@ -66,7 +69,6 @@ package net.pushl.io {
     }
     // TODO: refactoring to marge nextString
     def readLine() : String = {
-      if(isNewLine(peek)) read()
       if(endInt(peek))
         throw new NoSuchElementException("Reading Line failed")
       val builder = new StringBuilder
@@ -117,12 +119,17 @@ package net.pushl.io {
         read()
         goNextNotSpaceNorControl()
       }
-    @tailrec
-    final private def skipTrailingSpaces() : Unit =
-      if(!isNewLine(last) && !isNewLine(peek) && isSpaceOrControl(peek)){
-        read()
-        skipTrailingSpaces()
+    final private def skipTrailingSpaces() : Unit = {
+      @tailrec
+      def skipTrailingSpacesAux() : Unit = {
+        if(!isNewLine(last) && !isNewLine(peek) && isSpaceOrControl(peek)){
+          read()
+          skipTrailingSpacesAux()
+        }
       }
+      skipTrailingSpacesAux
+      if(!isNewLine(last) && isNewLine(peek)) read()
+    }
     @tailrec
     final private def skipTrailingSpacesAndNewline() : Unit =
       if(isNewLine(peek)){
@@ -134,6 +141,19 @@ package net.pushl.io {
     @inline private def goNextValuable() = {
       goNextNotSpaceNorControl()
       isThereReadable()
+    }
+    @inline private def parseLineToVector[X](parser: () => X) : Vector[X] = {
+      import scala.collection.immutable.VectorBuilder
+      val vb = new VectorBuilder[X]()
+      @tailrec
+      def parseLineToVectorAux(first: Boolean=false) : Vector[X] =
+        if((!first && isNewLine(last)) || isNewLine(peek) || endInt(peek)) {
+          vb.result
+        }else{
+          vb += parser()
+          parseLineToVectorAux()
+        }
+      parseLineToVectorAux(true)
     }
   }
 }
