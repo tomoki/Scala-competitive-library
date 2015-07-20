@@ -1,6 +1,47 @@
 import scala.annotation.tailrec
 import net.pushl.io.MyConsole
 
+package net.pushl {
+  package number {
+    // Prime    (Prime.scala)
+    // Number   (Number.scala)
+    // Combi    (Combi.scala)
+    // Optimize (Optimize.scala)
+  }
+  package string {
+    // RollingHash (RollingHash.scala)
+  }
+  package geometry {
+    // Point   (Geometry.scala)
+    // Segment (Geometry.scala)
+    // Line    (Geometry.scala)
+  }
+  package datastructure {
+    // UnionFindTree (UnionFind.scala)
+  }
+  package io {
+  }
+}
+
+// Document: http://www.scala-lang.org/api/current/#package
+// -----------------------------------------------------------------------------
+class Solver(val stdio: MyConsole){
+  import stdio._ // shadow Console.~
+  def main() : Unit = {
+    // write here.
+  }
+}
+
+
+
+
+
+
+
+
+
+// ----------------------------------------------------------------------------0
+// ----------------------------------------------------------------------------0
 object Main {
   def main(args: Array[String]) : Unit = {
     val console = new MyConsole(Console.in, Console.out, Console.err)
@@ -155,35 +196,6 @@ package net.pushl.io {
         }
       parseLineToVectorAux(true)
     }
-  }
-}
-
-package net.pushl {
-  package number {
-    // Prime  (Prime.scala)
-    // Number (Number.scala)
-  }
-  package string {
-    // RollingHash (RollingHash.scala)
-  }
-  package geometry {
-    // Point   (Geometry.scala)
-    // Segment (Geometry.scala)
-    // Line    (Geometry.scala)
-  }
-  package datastructure {
-    // UnionFindTree (UnionFind.scala)
-  }
-  package io {
-  }
-}
-
-// Document: http://www.scala-lang.org/api/current/#package
-// -----------------------------------------------------------------------------
-class Solver(val stdio: MyConsole){
-  import stdio._ // shadow Console.~
-  def main() : Unit = {
-    // write here.
   }
 }
 
