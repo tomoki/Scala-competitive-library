@@ -24,5 +24,6 @@ rm -r $PWD/target
 rm -r $PWD/copy.sh
 rm -r $PWD/README.md
 find  $PWD/src/test/scala -type f | grep -v -w "MainTest.scala" | grep -v -w "Test.scala" | xargs rm
+find  $PWD -type f -name ".gitkeep" | xargs rm
 
 exit 0
