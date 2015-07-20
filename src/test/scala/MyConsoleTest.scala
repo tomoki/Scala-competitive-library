@@ -215,6 +215,11 @@ class MyConsoleSpec extends FlatSpec with PrivateMethodTester with TimeLimitedTe
     assert(a == " a ")
     assert(b == " b ")
   }
+  "abcde\n25' -> readString -> readInt" should "generate 'abcde' and 25" in {
+    val c = generateConsole("abcde\n25")
+    assert(c.nextString() == "abcde")
+    assert(c.nextInt()    == 25)
+  }
   "' a \n b ' -> getString -> readLine" should "generate 'a' and ' b '" in {
     val c = generateConsole(" a \n b ")
     val a = c.nextString
@@ -228,6 +233,27 @@ class MyConsoleSpec extends FlatSpec with PrivateMethodTester with TimeLimitedTe
     val b = c.readLine
     assert(a == "a")
     assert(b == " b ")
+  }
+  "'\n' -> readLine" should "generate ''" in {
+    val c = generateConsole("\n")
+    assert(c.readLine() == "")
+  }
+  "'\n\n' -> readLine -> readLine" should "generate '', ''" in {
+    val c = generateConsole("\n\n")
+    assert(c.readLine() == "")
+    assert(c.readLine() == "")
+  }
+  "'g\n\n\n' -> getString -> readLine -> readLine" should "generate 'g' and '', ''" in {
+    val c = generateConsole("g\n\n\n")
+    assert(c.nextString() == "g")
+    assert(c.readLine() == "")
+    assert(c.readLine() == "")
+  }
+  "'1\n\n\n' -> getInt -> readLine -> readLine" should "generate '1' and '', ''" in {
+    val c = generateConsole("1\n\n\n")
+    assert(c.nextInt() == 1)
+    assert(c.readLine() == "")
+    assert(c.readLine() == "")
   }
   "'123 456\nabcd' -> nextInt -> nextInt -> readLine" should "generate 123 456 abcd" in {
     val c = generateConsole(" 123 456\nabcd")
@@ -260,5 +286,47 @@ class MyConsoleSpec extends FlatSpec with PrivateMethodTester with TimeLimitedTe
     val d = c.readLine
     assert(b == "abc")
     assert(d == "a")
+  }
+
+  "'123' -> readIntVector" should "Vector(123)" in {
+    val c = generateConsole("123")
+    assert(c.readIntVector() == Vector(123))
+  }
+  "'1\n2' -> readIntVector -> readIntvector" should "Vector(1),Vector(2)" in {
+    val c = generateConsole("1\n2")
+    assert(c.readIntVector() == Vector(1))
+    assert(c.readIntVector() == Vector(2))
+  }
+  "'1 \n 2' -> readIntVector -> readIntvector" should "Vector(1),Vector(2)" in {
+    val c = generateConsole("1 \n 2 ")
+    assert(c.readIntVector() == Vector(1))
+    assert(c.readIntVector() == Vector(2))
+  }
+  "'1 \n2' -> readIntVector -> readIntvector" should "Vector(1),Vector(2)" in {
+    val c = generateConsole("1 \n2 ")
+    assert(c.readIntVector() == Vector(1))
+    assert(c.readIntVector() == Vector(2))
+  }
+  "'123 456' -> readIntVector" should "Vector(123,456)" in {
+    val c = generateConsole("123 456")
+    assert(c.readIntVector() == Vector(123,456))
+  }
+  "'  123   456 ' -> readIntVector" should "Vector(123,456)" in {
+    val c = generateConsole("  123   456 ")
+    assert(c.readIntVector() == Vector(123,456))
+  }
+  "'  123   456 \n 7 8 9' -> readIntVector -> readIntvector" should "Vector(123,456),Vector(7,8,9)" in {
+    val c = generateConsole("  123   456 \n 7 8 9")
+    assert(c.readIntVector() == Vector(123,456))
+    assert(c.readIntVector() == Vector(7,8,9))
+  }
+
+  ("'1 2\n3 4 5 6\n7 8 9 10' -> nextInt -> nextInt  -> readIntvector -> readIntVector" should
+     "1, 2, Vector(3 4 5 6), Vector(7 8 9 10)") in {
+    val c = generateConsole("1 2\n3 4 5 6\n7 8 9 10")
+    assert(c.nextInt() == 1)
+    assert(c.nextInt() == 2)
+    assert(c.readIntVector() == Vector(3,4,5,6))
+    assert(c.readIntVector() == Vector(7,8,9,10))
   }
 }

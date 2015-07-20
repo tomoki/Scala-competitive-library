@@ -42,7 +42,7 @@ package net.pushl.io {
       def readLong(next: Int, cur: Long) : Long =
         if('0' <= next && next <= '9')
           readLong(readWithoutCheckingPeeked(), cur*10 + next-'0')
-        else if(endInt(next) || isSpaceOrControl(next))
+        else if(isEnd(next) || isSpaceOrControl(next))
           sgn*cur
         else
           throw new NumberFormatException(s"readLong found strange byte $next")
@@ -56,7 +56,7 @@ package net.pushl.io {
       val builder = new StringBuilder
       @tailrec
       def appendCode(next: Int) : String = {
-        if(endInt(next) || isSpaceOrControl(next)){
+        if(isEnd(next) || isSpaceOrControl(next)){
           builder.toString
         }else{
           builder.append(next.toChar)
@@ -69,12 +69,12 @@ package net.pushl.io {
     }
     // TODO: refactoring to marge nextString
     def readLine() : String = {
-      if(endInt(peek))
+      if(isEnd(peek))
         throw new NoSuchElementException("Reading Line failed")
       val builder = new StringBuilder
       @tailrec
       def appendCode(next: Int) : String = {
-        if(endInt(next) || isNewLine(next)){
+        if(isEnd(next) || isNewLine(next)){
           builder.toString
         }else{
           builder.append(next.toChar)
@@ -108,9 +108,9 @@ package net.pushl.io {
         }
         case Some(a) => a
       }
-    @inline private def endInt(c: Int)    = c == -1
+    @inline private def isEnd(c: Int)    = c == -1
     @inline private def isNewLine(c: Int) = c == 10 || c == 13     // LF and CR
-    @inline private def isThereReadable() = !endInt(peek)
+    @inline private def isThereReadable() = !isEnd(peek)
     // XXX: this limits c is ASCII?
     @inline private def isSpaceOrControl(c: Int) = (0 <= c && c <= 32) || c == 127
     @tailrec
@@ -147,7 +147,7 @@ package net.pushl.io {
       val vb = new VectorBuilder[X]()
       @tailrec
       def parseLineToVectorAux(first: Boolean=false) : Vector[X] =
-        if((!first && isNewLine(last)) || isNewLine(peek) || endInt(peek)) {
+        if((!first && isNewLine(last)) || isNewLine(peek) || isEnd(peek)) {
           vb.result
         }else{
           vb += parser()
