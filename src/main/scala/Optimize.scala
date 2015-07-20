@@ -3,7 +3,7 @@ package net.pushl.number {
     // find lowest value that satisfy f
     //  lower should NOT satisfy f
     //  upper should satisfy f
-    def binary_search(f : (Double) => Boolean,
+    def binarySearch(f : (Double) => Boolean,
                       lower : Double, upper : Double) : Double = {
       assert(!f(lower), s"f(lower) should be false (lower = $lower)")
       assert(f(upper)    , s"f(upper) should be true (upper  = $lower)")
@@ -17,7 +17,7 @@ package net.pushl.number {
       u
     }
     // 凸関数の極大な点をもとめる
-    def ternary_search(f     : (Double) => Double,
+    def ternarySearch(f     : (Double) => Double,
                        left  : Double,
                        right : Double) : Double = {
       var l = left
@@ -33,10 +33,10 @@ package net.pushl.number {
       (l+r)/2
     }
     // 凹関数の極小な点を求める
-    def ternary_search_concave(f     : Double => Double,
+    def ternarySearchConcave(f     : Double => Double,
                                left  : Double,
                                right : Double) : Double = {
-      ternary_search(-f(_),left,right)
+      ternarySearch(-f(_),left,right)
     }
   }
 }
