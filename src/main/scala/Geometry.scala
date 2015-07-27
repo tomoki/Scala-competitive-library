@@ -62,6 +62,11 @@ package net.pushl {
 
     class Segment(val a: Point, val b: Point) {
       val EPS = 1e-7 // TODO: make it private final
+      // TODO: test.
+      def distanceTo(t: Point) : Double =
+        if     (((a-b) dot (t-b)).abs < EPS) (t-b).abs
+        else if(((b-a) dot (t-a)).abs < EPS) (t-a).abs
+        else Math.abs(((a-t) cross (b-t)) / (a-b).abs)
       // TODO: test this
       // def isIntersected(that: Segment) = {
       //   val this_a_x  = a.x
