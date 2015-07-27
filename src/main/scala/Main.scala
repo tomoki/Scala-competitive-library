@@ -28,7 +28,6 @@ package net.pushl {
 class Solver(val stdio: MyConsole){
   import stdio._ // shadow Console.~
   def main() : Unit = {
-    // write here.
   }
 }
 
@@ -169,7 +168,7 @@ package net.pushl.io {
         }
       }
       skipTrailingSpacesAux
-      if(!isNewLine(last) && isNewLine(peek)) read()
+      if(!isNewLine(last) && isNewLine(peek)) {val _ = read()}
     }
     @tailrec
     final private def skipTrailingSpacesAndNewline() : Unit =
