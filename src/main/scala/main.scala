@@ -80,13 +80,15 @@ package net.pushl.io {
         throw new NumberFormatException(s"readLong found only '-' or no number")
       @tailrec
       def readLong(next: Int, cur: Long) : Long =
-        if('0' <= next && next <= '9')
-          readLong(readWithoutCheckingPeeked(), cur*10 + next-'0')
+        if('0' <= next && next <= '9'){
+          val _ = read() // is equal to next
+          readLong(peek, cur*10 + next-'0')
+        }
         else if(isEnd(next) || isSpaceOrControl(next))
           sgn*cur
         else
           throw new NumberFormatException(s"readLong found strange byte $next")
-      val res = readLong(read(),0)
+      val res = readLong(peek,0)
       skipTrailingSpaces()
       res
     }
@@ -99,11 +101,11 @@ package net.pushl.io {
         if(isEnd(next) || isSpaceOrControl(next)){
           builder.toString
         }else{
-          builder.append(next.toChar)
-          appendCode(readWithoutCheckingPeeked())
+          builder.append(read().toChar) // here we skip.
+          appendCode(peek)
         }
       }
-      val res = appendCode(read())
+      val res = appendCode(peek)
       skipTrailingSpaces()
       res
     }
@@ -111,6 +113,7 @@ package net.pushl.io {
     def readLine() : String = {
       if(isEnd(peek))
         throw new NoSuchElementException("Reading Line failed")
+      skipNewline()
       val builder = new StringBuilder
       @tailrec
       def appendCode(next: Int) : String = {
@@ -125,21 +128,16 @@ package net.pushl.io {
     }
     // helpers
     private[this] var peeked: Option[Int] = None
-    private[this] var last = -1
+    private[this] var is_first = true
     private def read() = {
       val res = peeked match {
-          case None    => in.read()
-          case Some(a) => { peeked = None; a }
-        }
-      last = res
+        case None    => in.read()
+        case Some(a) => { peeked = None; a }
+      }
+      is_first = false
       res
     }
-    @inline private def readWithoutCheckingPeeked() = {
-      val res = in.read()
-      last = res
-      res
-    }
-    @inline private def peek() =
+    private def peek() =
       peeked match {
         case None    => {
           val res = in.read()
@@ -148,11 +146,13 @@ package net.pushl.io {
         }
         case Some(a) => a
       }
-    @inline private def isEnd(c: Int)    = c == -1
-    @inline private def isNewLine(c: Int) = c == 10 || c == 13     // LF and CR
-    @inline private def isThereReadable() = !isEnd(peek)
+    private def isEnd(c: Int)     = c == -1
+    private def isCR(c: Int)      = c == 13
+    private def isLF(c: Int)      = c == 10
+    private def isNewLine(c: Int) = isLF(c) || isCR(c)
+    private def isThereReadable() = !isEnd(peek)
     // XXX: this limits c is ASCII?
-    @inline private def isSpaceOrControl(c: Int) = (0 <= c && c <= 32) || c == 127
+    private def isSpaceOrControl(c: Int) = (0 <= c && c <= 32) || c == 127
     @tailrec
     final private def goNextNotSpaceNorControl() : Unit =
       if(isSpaceOrControl(peek)){
@@ -162,32 +162,33 @@ package net.pushl.io {
     final private def skipTrailingSpaces() : Unit = {
       @tailrec
       def skipTrailingSpacesAux() : Unit = {
-        if(!isNewLine(last) && !isNewLine(peek) && isSpaceOrControl(peek)){
+        if(!isNewLine(peek) && isSpaceOrControl(peek)){
           read()
           skipTrailingSpacesAux()
         }
       }
-      skipTrailingSpacesAux
-      if(!isNewLine(last) && isNewLine(peek)) {val _ = read()}
+      skipTrailingSpacesAux()
     }
-    @tailrec
-    final private def skipTrailingSpacesAndNewline() : Unit =
-      if(isNewLine(peek)){
-        val _ = read() // windows causes error. maybe.
-      }else if(isSpaceOrControl(peek)){
+    final private def skipNewline() : Unit = {
+      if(is_first){
+      }else if(isCR(peek)){
         read()
-        skipTrailingSpacesAndNewline()
+        if(isLF(peek)) read()
+      }else if(isLF(peek)){
+        read()
       }
-    @inline private def goNextValuable() = {
+    }
+    private def goNextValuable() = {
       goNextNotSpaceNorControl()
       isThereReadable()
     }
-    @inline private def parseLineToVector[X](parser: () => X) : Vector[X] = {
+    private def parseLineToVector[X](parser: () => X) : Vector[X] = {
       import scala.collection.immutable.VectorBuilder
       val vb = new VectorBuilder[X]()
+      skipNewline()
       @tailrec
       def parseLineToVectorAux(first: Boolean=false) : Vector[X] =
-        if((!first && isNewLine(last)) || isNewLine(peek) || isEnd(peek)) {
+        if(isNewLine(peek) || isEnd(peek)) {
           vb.result
         }else{
           vb += parser()
