@@ -151,7 +151,6 @@ package net.pushl.io {
     private def isLF(c: Int)      = c == 10
     private def isNewLine(c: Int) = isLF(c) || isCR(c)
     private def isThereReadable() = !isEnd(peek)
-    // XXX: this limits c is ASCII?
     private def isSpaceOrControl(c: Int) = (0 <= c && c <= 32) || c == 127
     @tailrec
     final private def goNextNotSpaceNorControl() : Unit =
@@ -187,14 +186,14 @@ package net.pushl.io {
       val vb = new VectorBuilder[X]()
       skipNewline()
       @tailrec
-      def parseLineToVectorAux(first: Boolean=false) : Vector[X] =
+      def parseLineToVectorAux() : Vector[X] =
         if(isNewLine(peek) || isEnd(peek)) {
           vb.result
         }else{
           vb += parser()
           parseLineToVectorAux()
         }
-      parseLineToVectorAux(true)
+      parseLineToVectorAux()
     }
   }
 }

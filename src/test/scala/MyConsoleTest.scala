@@ -363,4 +363,9 @@ class MyConsoleSpec extends FlatSpec with PrivateMethodTester with TimeLimitedTe
     assert(c.nextInt() == 5)
     assert(c.readLine() == "1")
   }
+
+  "'にほんご' -> nextString" should "'にほんご'" in {
+    val c = generateConsole("にほんご")
+    assert(c.nextString() == "にほんご")
+  }
 }
