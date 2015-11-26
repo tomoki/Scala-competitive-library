@@ -78,5 +78,16 @@ class TestFraction extends FlatSpec with Checkers {
             }
           })
   }
+  "a - b " should "be a + (-b)" in {
+    check((a: Int, b: Int, c: Int, d: Int) => {
+            if(b != 0 && c != 0 && d != 0){
+              val k1 = Fraction(a,b)
+              val k2 = Fraction(c,d)
+              k1 - k2 == k1 + (-k2)
+            }else{
+              true
+            }
+          })
+  }
 }
 

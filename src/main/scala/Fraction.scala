@@ -27,17 +27,16 @@ package net.pushl.number {
   object FractionImplicits {
     implicit object FractionIsFractional extends Fractional[Fraction] {
       def compare(x: Fraction, y: Fraction) : Int = (x.numerator * y.denominator) compare (x.denominator * y.numerator)
-      def plus(x: Fraction,  y: Fraction) : Fraction = Fraction(x.numerator   * y.denominator + x.denominator * y.numerator ,
+      def plus(x: Fraction,  y: Fraction) : Fraction = Fraction(x.numerator * y.denominator + x.denominator * y.numerator,
                                                                 x.denominator * y.denominator)
-      def minus(x: Fraction, y: Fraction) : Fraction = Fraction(x.numerator   * y.denominator - x.denominator * y.numerator ,
-                                                                x.denominator * y.denominator)
+      def minus(x: Fraction, y: Fraction) : Fraction = plus(x,negate(y))
       def times(x: Fraction, y: Fraction) : Fraction = Fraction(x.numerator * y.numerator, x.denominator * y.denominator)
-      def div(x: Fraction,   y: Fraction) : Fraction = Fraction(x.numerator * y.denominator, x.denominator * y.numerator)
-      def negate(x: Fraction) : Fraction = Fraction(-x.numerator, x.denominator)
-      def fromInt(x: Int)      : Fraction = Fraction(x,1)
+      def div(x: Fraction,   y: Fraction) : Fraction = times(x, Fraction(y.denominator, y.numerator))
+      def negate(x: Fraction) : Fraction  = Fraction(-x.numerator, x.denominator)
+      def fromInt(x: Int)     : Fraction  = Fraction(x,1)
       def toInt(x: Fraction)     : Int    = (x.numerator / x.denominator).toInt
       def toLong(x: Fraction)    : Long   = (x.numerator / x.denominator).toLong
-      def toFloat(x: Fraction)   : Float  = x.numerator.toFloat / x.denominator.toFloat
+      def toFloat(x: Fraction)   : Float  = toDouble(x).toFloat
       def toDouble(x : Fraction) : Double = x.numerator.toDouble / x.denominator.toDouble
     }
   }
