@@ -1,15 +1,48 @@
 import org.scalatest.FlatSpec
 import org.scalatest.time._
-import org.scalatest.concurrent.Timeouts
+import org.scalatest.concurrent.{Interruptor, Timeouts}
 import java.nio.file.{Paths, Files}
+import net.pushl.io.MyConsole
+
+class TestConsole(val _in:   java.io.InputStream,
+                  val __out: java.io.OutputStream)
+    extends MyConsole(new java.io.BufferedReader(new java.io.InputStreamReader(_in)),
+                      new java.io.PrintStream(__out),
+                      Console.err) {
+  override def read() = {
+    val ret = super.read()
+    err.print("\u001b[34m" + ret.toChar + "\u001b[0m")
+    ret
+  }
+  override def print(obj: Any) = {
+    val str = if(obj == null) "null" else obj.toString
+    err.print("\u001b[32m" + str + "\u001b[0m")
+    super.print(str)
+  }
+  override def println() = {
+    err.println()
+    super.println()
+  }
+  override def println(obj: Any) = {
+    err.println("\u001b[32m" + obj + "\u001b[0m")
+    super.println(obj)
+  }
+  override def printf(text: String, args: Any*) = {
+    err.print("\u001b[32m")
+    err.printf(text.format(args : _*))
+    err.print("\u001b[0m")
+
+    super.printf(text, args)
+  }
+}
 
 class MainSpec extends FlatSpec with Timeouts {
   def execWithDummyStdio(main : (Array[String]) => Unit, input : String) : String = {
     val istream = new java.io.ByteArrayInputStream(input.getBytes)
     val ostream = new java.io.ByteArrayOutputStream
-    Console.withIn(istream) { Console.withOut(ostream) {
-        main(Array[String]())
-    } }
+    val console = new TestConsole(istream, ostream)
+    new Solver(console).main()
+    console.flush()
     return ostream.toString
   }
   def lsFile(dir : String) : Seq[java.io.File] = {
@@ -40,6 +73,7 @@ class MainSpec extends FlatSpec with Timeouts {
       val start     = System.currentTimeMillis()
       // not work because typically, program does not contain Threads.sleep or Object.wait
       var dummy_out = ""
+      // implicit val defaultInterruptor = ForceInterruptor
       failAfter(Span(timeout, Millis)) {
         dummy_out = execWithDummyStdio(Main.main,dummy_in)
       }

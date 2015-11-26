@@ -1,28 +1,6 @@
 import scala.annotation.tailrec
 import net.pushl.io.MyConsole
 
-package net.pushl {
-  package number {
-    // Prime    (Prime.scala)
-    // Number   (Number.scala)
-    // Combi    (Combi.scala)
-    // Optimize (Optimize.scala)
-  }
-  package string {
-    // RollingHash (RollingHash.scala)
-  }
-  package geometry {
-    // Point   (Geometry.scala)
-    // Segment (Geometry.scala)
-    // Line    (Geometry.scala)
-  }
-  package datastructure {
-    // UnionFindTree (UnionFind.scala)
-  }
-  package io {
-  }
-}
-
 // Document: http://www.scala-lang.org/api/current/#package
 // -----------------------------------------------------------------------------
 class Solver(val stdio: MyConsole){
@@ -62,7 +40,7 @@ package net.pushl.io {
     def printf(text: String, args: Any*) = out.printf(text.format(args : _*))
     // NOTE: YOU MUST FLUSH BEFORE END OF MAIN
     def flush()                          = out.flush()
-    def debugln(obj: Any)                = err.println(obj)
+    def debugln(obj: Any)                = err.println("\u001b[36m" + obj + "\u001b[0m")
 
     def readIntVector()    : Vector[Int]    = parseLineToVector(() => nextInt)
     def readLongVector()   : Vector[Long]   = parseLineToVector(() => nextLong)
@@ -75,13 +53,13 @@ package net.pushl.io {
       if(!goNextValuable())
         throw new NoSuchElementException("Reading long failed")
       val sgn = if(peek == '-') -1l else 1
-      if(sgn == -1l) read()
+      if(sgn == -1l) ignore(read())
       if(peek < '0' || '9' < peek)
         throw new NumberFormatException(s"readLong found only '-' or no number")
       @tailrec
       def readLong(next: Int, cur: Long) : Long =
         if('0' <= next && next <= '9'){
-          val _ = read() // is equal to next
+          ignore(read()) // is equal to next
           readLong(peek, cur*10 + next-'0')
         }
         else if(isEnd(next) || isSpaceOrControl(next))
@@ -127,9 +105,10 @@ package net.pushl.io {
       appendCode(read())
     }
     // helpers
+    private def ignore[T](x: => T) : Unit = { x; () }
     private[this] var peeked: Option[Int] = None
     private[this] var is_first = true
-    private def read() = {
+    protected def read() = {
       val res = peeked match {
         case None    => in.read()
         case Some(a) => { peeked = None; a }
@@ -155,32 +134,31 @@ package net.pushl.io {
     @tailrec
     final private def goNextNotSpaceNorControl() : Unit =
       if(isSpaceOrControl(peek)){
-        read()
+        ignore(read())
         goNextNotSpaceNorControl()
       }
     final private def skipTrailingSpaces() : Unit = {
       @tailrec
       def skipTrailingSpacesAux() : Unit = {
         if(!isNewLine(peek) && isSpaceOrControl(peek)){
-          read()
+          ignore(read())
           skipTrailingSpacesAux()
         }
       }
       skipTrailingSpacesAux()
     }
-    final private def skipNewline() : Unit = {
-      if(is_first){
-      }else if(isCR(peek)){
-        read()
-        if(isLF(peek)) read()
-      }else if(isLF(peek)){
-        read()
+    final private def skipNewline() : Unit =
+      if(!is_first){
+        if(isCR(peek))
+          ignore(read())
+        if(isLF(peek))
+          ignore(read())
       }
-    }
-    private def goNextValuable() = {
+    private def goNextValuable() : Boolean = {
       goNextNotSpaceNorControl()
       isThereReadable()
     }
+
     private def parseLineToVector[X](parser: () => X) : Vector[X] = {
       import scala.collection.immutable.VectorBuilder
       val vb = new VectorBuilder[X]()
@@ -197,4 +175,3 @@ package net.pushl.io {
     }
   }
 }
-
