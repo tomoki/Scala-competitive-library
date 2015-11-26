@@ -19,6 +19,7 @@ package net.pushl.number {
         case _              => false
       }
     }
+    override def hashCode() : Int = (31 * numerator + denominator).toInt
   }
   object Fraction {
     def apply(n: BigInt) = new Fraction(n,1)
