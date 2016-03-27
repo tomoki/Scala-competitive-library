@@ -116,5 +116,22 @@ package net.pushl {
                                         else
                                           new Line(p1,p2)
     }
+    object Geometry {
+      // https://www.hackerrank.com/contests/lambda-calculi-march-2016/challenges/lambda-march-compute-the-area-of-a-polygon
+      // http://mathworld.wolfram.com/PolygonArea.html
+      // This can be negative if they are in clockwise order.
+      def polygonArea(points: Seq[Point]) : Double = {
+        if(points.length < 3)
+          0
+        else
+          (points zip (points.tail :+ points.head)).map(
+            {case (a, b) =>  a.x * b.y - b.x * a.y}).sum / 2
+      }
+      def polygonPerimeter(points: Seq[Point]) : Double = {
+        (points zip (points.tail :+ points.head)).map(
+          {case (a, b) => (a-b).abs}
+        ).sum
+      }
+    }
   }
 }
