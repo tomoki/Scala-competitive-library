@@ -43,7 +43,7 @@ package net.pushl.number {
       for(i <- 0 to 200) {
         val ls = (2*l +   r) / 3
         val rs = (l   + 2*r) / 3
-        if(f(ls) < f(r))
+        if(f(ls) < f(rs))
           l = ls
         else
           r = rs
